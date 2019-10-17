@@ -36,7 +36,7 @@ public class actorController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Vector3 camPath = (actor.transform.position - cam.transform.position).normalized * Time.deltaTime * 10f;
+        Vector3 camPath = (actor.transform.position - cam.transform.position).normalized * Time.deltaTime * 30f;
         Vector3 dir = new Vector3(camPath.x, 0, camPath.z);
         if (Input.GetButton("W"))
         {

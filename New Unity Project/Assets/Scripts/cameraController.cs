@@ -19,8 +19,8 @@ public class cameraController : MonoBehaviour
         Vector3 rel_pos = (cam.transform.position - actor.transform.position);
         phi = Mathf.Atan2(rel_pos.x, rel_pos.z);
         theta = Mathf.Acos(rel_pos.y / rel_pos.magnitude);
-        phi += x_input * 0.05f;
-        theta += y_input * 0.05f;
+        phi += x_input * 0.1f;
+        theta += y_input * 0.1f;
         float new_y = r * Mathf.Cos(theta);
         float new_x = r * Mathf.Sin(theta) * Mathf.Sin(phi);
         float new_z = r * Mathf.Sin(theta) * Mathf.Cos(phi);
