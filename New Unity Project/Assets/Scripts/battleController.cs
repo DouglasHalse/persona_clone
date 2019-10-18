@@ -5,8 +5,10 @@ using UnityEngine;
 public class battleController : MonoBehaviour
 {
     public GameObject player;
+    public GameObject enemy_model;
     private GameObject cam;
-    private int aliveEnemies;
+    public int aliveEnemies;
+    private List<GameObject> enemies;
 
 
     private List<Vector3> get_enemy_stations(int number_of_enemies)
@@ -45,21 +47,38 @@ public class battleController : MonoBehaviour
 
         return pos;
     }
+    private void create_enemies(int number_of_enemies, List<Vector3> positions)
+    {
+        Vector3 model_offset = new Vector3(0, 1, 0);
+        foreach(Vector3 position in positions)
+        {
+            GameObject enemy = Instantiate(enemy_model, position + model_offset, Quaternion.identity);
+            enemies.Add(enemy);
+        }
+    }
     // Start is called before the first frame update
     void Start()
     {
         cam = player.transform.GetChild(0).gameObject;
         cam.GetComponent<cameraController>().enabled = false;
+
+        enemies = new List<GameObject>();
+        aliveEnemies = Random.Range(1, 5);
+        create_enemies(aliveEnemies, get_enemy_stations(aliveEnemies));
+        this.GetComponent<battleIntroAnimation>().enabled = true;
+        
+        Debug.Log("Number of enemies: " + aliveEnemies);
         //Disable player camera controller
 
         //Start battle intro animation script
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        cam.transform.position += Vector3.up; //successfully took control of camera
+        
+        //successfully took control of camera
         //Actual battle logic
     }
 }
