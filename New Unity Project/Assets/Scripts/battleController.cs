@@ -56,6 +56,25 @@ public class battleController : MonoBehaviour
             enemies.Add(enemy);
         }
     }
+    private bool is_idle()
+    {
+        if (this.GetComponent<battleIntroAnimation>().enabled)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    private void move_cam_to_battle_pos()
+    {
+        Vector3 start_loc = cam.transform.position;
+        Vector3 battle_loc = new Vector3(3, 3, -18);
+        Vector3 look_at_loc = new Vector3(0, 2, 10);
+        cam.transform.position = Vector3.Lerp(start_loc, battle_loc, Time.deltaTime * 20f);
+        cam.transform.rotation = Quaternion.Slerp(cam.transform.rotation, Quaternion.LookRotation(-cam.transform.position + look_at_loc), Time.deltaTime * 20f);
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -67,7 +86,7 @@ public class battleController : MonoBehaviour
         create_enemies(aliveEnemies, get_enemy_stations(aliveEnemies));
         this.GetComponent<battleIntroAnimation>().enabled = true;
         
-        Debug.Log("Number of enemies: " + aliveEnemies);
+        //Debug.Log("Number of enemies: " + aliveEnemies);
         //Disable player camera controller
 
         //Start battle intro animation script
@@ -77,6 +96,15 @@ public class battleController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(is_idle())
+        {
+            move_cam_to_battle_pos();
+
+        }
+        else
+        {
+            Debug.Log("Camera animation in progress");
+        }
         
         //successfully took control of camera
         //Actual battle logic

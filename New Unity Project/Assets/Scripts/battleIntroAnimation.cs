@@ -45,7 +45,7 @@ public class battleIntroAnimation : MonoBehaviour
         end_phi = (7 * Mathf.PI) / 4f;
         delta_phi = end_phi - phi;
         number_of_enemies = this.GetComponent<battleController>().aliveEnemies;
-        Debug.Log("camenemies: " + number_of_enemies);
+        //Debug.Log("camenemies: " + number_of_enemies);
         radius = 10f + (t * 10f);
         //x = r*cos(phi)
         //z = r*sin(phi)
@@ -60,7 +60,7 @@ public class battleIntroAnimation : MonoBehaviour
             cam.transform.LookAt(origo);
             cam.transform.position = get_xyz(phi + (delta_phi * t), get_radius(number_of_enemies, t)) + origo;
             //phi = phi + (delta_phi * t);
-            t += Time.deltaTime * 0.1f;
+            t += Time.deltaTime * 0.3f * (Mathf.Pow(t, 2) - t + 1);
         }
         else
         {
