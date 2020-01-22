@@ -9,7 +9,7 @@ public class cameraController : MonoBehaviour
     public GameObject cam;
     private float theta;
     private float phi;
-    private float r;
+    public float r;
     //private bool moving;
 
     private Vector3 get_new_xyz(float x_input, float y_input)
@@ -25,7 +25,8 @@ public class cameraController : MonoBehaviour
         float new_x = r * Mathf.Sin(theta) * Mathf.Sin(phi);
         float new_z = r * Mathf.Sin(theta) * Mathf.Cos(phi);
         Vector3 lookPath = -rel_pos;
-        cam.transform.rotation = Quaternion.RotateTowards(cam.transform.rotation, Quaternion.LookRotation(lookPath), Time.deltaTime * (Mathf.Pow(Quaternion.Angle(cam.transform.rotation, Quaternion.LookRotation(lookPath)), 4)));
+        cam.transform.rotation = Quaternion.Slerp(cam.transform.rotation, Quaternion.LookRotation(lookPath), Time.deltaTime * 1000f);
+        //cam.transform.rotation = Quaternion.RotateTowards(cam.transform.rotation, Quaternion.LookRotation(lookPath), Time.deltaTime * (Mathf.Pow(Quaternion.Angle(cam.transform.rotation, Quaternion.LookRotation(lookPath)), 4)));
         //cam.transform.LookAt(actor.transform.position);
         return new Vector3(new_x, new_y, new_z);
     }
@@ -43,6 +44,6 @@ public class cameraController : MonoBehaviour
     {
         //cam.transform.position = actor.transform.position + get_new_xyz(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
         Vector3 new_pos = actor.transform.position + get_new_xyz(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-        cam.transform.position = Vector3.Lerp(cam.transform.position, new_pos, 1000f * Time.deltaTime);
+        cam.transform.position = Vector3.Slerp(cam.transform.position, new_pos, 1000f * Time.deltaTime);
     }
 }
