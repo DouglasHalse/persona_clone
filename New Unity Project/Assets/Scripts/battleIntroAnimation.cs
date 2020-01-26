@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class battleIntroAnimation : MonoBehaviour
 {
-    public GameObject player;
-    private GameObject cam;
+    //public GameObject player;
+    public GameObject cam;
     private float t;
     private float phi;
     private float end_phi;
@@ -37,7 +37,7 @@ public class battleIntroAnimation : MonoBehaviour
     }
     void Start()
     {
-        cam = player.transform.GetChild(0).gameObject;
+        //cam = player.transform.GetChild(0).gameObject;
         t = 0;
         origo = new Vector3(0, 1, 15);
         

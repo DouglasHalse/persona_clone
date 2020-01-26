@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public class battleController : MonoBehaviour
@@ -8,7 +9,8 @@ public class battleController : MonoBehaviour
 
     public GameObject player;
     public GameObject enemy_model;
-    private GameObject cam;
+    public GameObject cam;
+    public Text debug_text;
     public int aliveEnemies;
     //public List<GameObject> enemies;
     public List<battle_agent> players;
@@ -28,7 +30,7 @@ public class battleController : MonoBehaviour
         {
             //Debug.Log("Creating battle agent...");
             this.player_name = name;
-            this.name = name;
+            //this.name = name;
             this.health = health;
             this.attack_power = attack_power;
             this.body = body;
@@ -107,7 +109,8 @@ public class battleController : MonoBehaviour
     }
     private bool is_idle()
     {
-        if (this.GetComponent<battleIntroAnimation>().enabled || this.GetComponent<Battle_camera_main>().enabled || players_turn)
+        //if (this.GetComponent<battleIntroAnimation>().enabled || this.GetComponent<Battle_camera_main>().enabled || !players_turn)
+        if (this.GetComponent<battleIntroAnimation>().enabled || this.GetComponent<Battle_camera_main>().enabled)
         {
             return false;
         }
@@ -129,10 +132,64 @@ public class battleController : MonoBehaviour
 
     }
     // Start is called before the first frame update
+
+    private battle_event next_move(Queue<battle_event> queue)
+    {
+        battle_event next_move = queue.Dequeue();
+        players_turn = !next_move.hostile;
+        int z = (int)next_move.turn_actor.body.transform.position.z;
+        z = z / (int)Mathf.Abs(z);
+        //Debug.Log(z);
+        //Vector3 desired_cam_offset = new Vector3(3*-z, 2, 8*z);//change this with cross products
+        Vector3 desired_cam_offset;
+        if(players_turn)
+        {
+            desired_cam_offset = new Vector3(3 * -z, 2, 8 * z);
+        }
+        else
+        {
+            Vector3 enemy_to_player = next_move.turn_actor.body.transform.position - player.transform.position;
+            enemy_to_player.y = 0f;
+            //Debug.Log(enemy_to_player);
+            Vector3 ortho = Vector3.Cross(Vector3.up, enemy_to_player).normalized;
+            //Debug.Log(ortho);
+            desired_cam_offset = new Vector3(3*ortho.x, 2, 3*ortho.z) + enemy_to_player.normalized*8;
+        }
+
+        Vector3 next_move_agent_pos = next_move.turn_actor.body.transform.position;
+        Vector3 final_cam_pos = next_move_agent_pos + desired_cam_offset;
+        Vector3 final_look_at_pos;
+        //Debug.Log(final_cam_pos);
+        if(next_move.hostile)
+        {
+            final_look_at_pos = player.transform.position;
+            //final_look_at_pos = final_cam_pos + player.transform.position;
+        }
+        else
+        {
+            final_look_at_pos = new Vector3(0, 2, 10);
+        }
+        
+        cam_main.set_cam_settings(final_cam_pos, final_look_at_pos);
+        //cam_main.set_cam_settings(new Vector3(3, 3, -18), new Vector3(0, 2, 10));
+        cam_main.run();
+        if (queue.Count == 0)
+        {
+            foreach (battle_agent i in players)
+            {
+                var temp = gameObject.AddComponent<battle_event>();
+                temp.setup_battle_event(i);
+                //temp.name = i.player_name;
+                battle_queue.Enqueue(temp);
+            }
+        }
+
+        return next_move;
+    }
     void Start()
     {
         cam_main = this.GetComponent<Battle_camera_main>();
-        cam = player.transform.GetChild(0).gameObject;
+        //cam = player.transform.GetChild(0).gameObject;
         cam.GetComponent<cameraController>().enabled = false;
         player.GetComponent<actorController>().enabled = false;
         //enemies = new List<GameObject>();
@@ -150,16 +207,17 @@ public class battleController : MonoBehaviour
         this.GetComponent<battleIntroAnimation>().enabled = true;
         foreach (battle_agent i in players)
         {
-            
             var temp = gameObject.AddComponent<battle_event>();
             temp.setup_battle_event(i);
             //temp.name = i.player_name;
             battle_queue.Enqueue(temp);
         }
-        current_move = battle_queue.Dequeue();
+        //!!!current_move = battle_queue.Dequeue();
+        Debug.Log("First move triggered");
+        current_move = next_move(battle_queue);
         //Debug.Log("Number of enemies: " + aliveEnemies);
         //Disable player camera controller
-
+        
         //Start battle intro animation script
 
     }
@@ -168,7 +226,10 @@ public class battleController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        debug_text.text = "Debug: \n" + 
+            "Animation in progress: " + !is_idle() + "\n" +
+            "Current move: " + current_move.turn_actor.player_name + "\n" + 
+            "Current player HP: " + current_move.turn_actor.health + "\n";
         if (is_idle())
         {
             //Debug.Log("Queue count: " + battle_queue.Count);
@@ -176,19 +237,26 @@ public class battleController : MonoBehaviour
             
             if(!current_move.hostile)
             {
-                players_turn = true;
-                cam_main.set_cam_settings(new Vector3(3, 3, -18), new Vector3(0, 2, 10));
-                cam_main.run();
-                Debug.Log("Players move!");
-                if(Input.GetButtonDown("W"))
+                //players_turn = true;
+                //cam_main.set_cam_settings(new Vector3(3, 3, -18), new Vector3(0, 2, 10));
+                //cam_main.run();
+                //Debug.Log("Players move!");
+                if(Input.GetButton("W"))
                 {
                     Debug.Log("Next turn!");
-                    current_move = battle_queue.Dequeue();
+                    current_move = next_move(battle_queue);
+                    //current_move = battle_queue.Dequeue();
                 }
             }
             else if(current_move.hostile)
             {
-                Debug.Log("Enemy turn!");
+                //Debug.Log("Enemy turn!");
+                if (Input.GetButton("W"))
+                {
+                    Debug.Log("Next turn!");
+                    current_move = next_move(battle_queue);
+                    //current_move = battle_queue.Dequeue();
+                }
                 //AI CONTROLL
             }
             //move_cam_to_start_pos();
@@ -198,6 +266,7 @@ public class battleController : MonoBehaviour
         }
         else
         {
+            //Debug.Log("Not idle");
             //Animations are prob running...
             //Debug.Log("Camera animation in progress");
         }

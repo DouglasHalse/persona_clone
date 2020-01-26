@@ -14,6 +14,7 @@ public class Battle_camera_main : MonoBehaviour
     private float angle;
     public float t;
     public bool movement_done;
+    battleIntroAnimation introcam;
     public void set_cam_settings(Vector3 desired_cam_pos, Vector3 desired_cam_lookat)
     {
         this.desired_cam_pos = desired_cam_pos;
@@ -26,7 +27,7 @@ public class Battle_camera_main : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        introcam = GetComponent<battleIntroAnimation>();
     }
     private void OnEnable()
     {
@@ -34,7 +35,8 @@ public class Battle_camera_main : MonoBehaviour
         current_cam_pos = cam.transform.position;
         cam_move_rail = desired_cam_pos - current_cam_pos;
         current_lookat = cam.transform.rotation;
-        desired_lookat = Quaternion.LookRotation(-new Vector3(3, 3, -18) + desired_cam_lookat);
+        desired_lookat = Quaternion.LookRotation(-desired_cam_pos + desired_cam_lookat);
+        //desired_lookat = Quaternion.LookRotation(-new Vector3(3, 3, -18) + desired_cam_lookat);
         angle = Quaternion.Angle(current_lookat, desired_lookat);
         //Debug.Log("Angle: " + angle);
         //cam.transform.position = Vector3.Lerp(current_cam_pos, desired_cam_pos, Time.deltaTime * 20f);
@@ -44,19 +46,30 @@ public class Battle_camera_main : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(t<1f)
+        if (!introcam.enabled)
         {
-            //cam.transform.position = desired_cam_pos;
-            cam.transform.position = current_cam_pos + cam_move_rail * t;
-            //cam.transform.rotation = current_lookat
-            cam.transform.rotation = Quaternion.RotateTowards(current_lookat, desired_lookat, angle*t);//Its shagged
-            t = t + 2f * Time.deltaTime;
+            if (t < 1f)
+            {
+                //cam.transform.position = desired_cam_pos;
+                cam.transform.position = current_cam_pos + cam_move_rail * t;
+                //cam.transform.rotation = current_lookat
+                cam.transform.rotation = Quaternion.RotateTowards(current_lookat, desired_lookat, angle * t);//Its shagged
+                t = t + 2f * Time.deltaTime;
+            }
+            else
+            {
+                t = 0f;
+                this.enabled = false;
+            }
         }
         else
         {
-            t = 0f;
-            this.enabled = false;
+            current_cam_pos = cam.transform.position;
+            cam_move_rail = desired_cam_pos - current_cam_pos;
+            current_lookat = cam.transform.rotation;
+            angle = Quaternion.Angle(current_lookat, desired_lookat);
         }
+        
         
     }
 }

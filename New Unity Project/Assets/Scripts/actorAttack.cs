@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class actorAttack : MonoBehaviour
@@ -10,6 +11,8 @@ public class actorAttack : MonoBehaviour
     public bool attack_available; //change to private
     public GameObject target; // ----
     public GameObject[] temp;
+    private Text debug_text;
+    public Canvas debug_canvas;
     private Vector3 target_loc;
     private Vector3 actor_loc;
     private Vector3 arc_middle;
@@ -39,12 +42,19 @@ public class actorAttack : MonoBehaviour
         t = 0;
         attacking = false;
         scenes = AssetBundle.LoadFromFile("Assets/AssetBundles/scenes");
+        debug_text = debug_canvas.GetComponent<Text>();
 
     }
 
     // Update is called once per frame
     void Update()
     {
+        debug_text.text = "Debug information\n\n" + 
+            "actorAttack Script:\n" + 
+            "Actor can attack: " + attack_available + "\n" + 
+            "Currently attacking: " + attacking + "\n" + 
+            "Current target: " + target + "\n" + 
+            "Enemies available: " + temp.Length + "\n";
         //Debug.Log(enemies.Count);
         temp = GameObject.FindGameObjectsWithTag("enemy");
         foreach (GameObject i in temp)
@@ -70,7 +80,12 @@ public class actorAttack : MonoBehaviour
                 target_loc = target.transform.position + Vector3.up;
                 actor_loc = actor.transform.position;
                 arc_middle = 8 * Vector3.up + (actor_loc + target_loc) / 2;
-                attacking = true;
+                attack_available = true;
+                if(Input.GetMouseButtonDown(0))
+                {
+                    attacking = true;
+                }
+                
             }
             else
             {
@@ -79,7 +94,8 @@ public class actorAttack : MonoBehaviour
                 if(t > 1f)
                 {
                     attacking = false;
-                    this.enabled = false;
+                    attack_available = false;
+                    //this.enabled = false;
                     //SceneManager.LoadScene("battle");
                     t = 0;
                 }
